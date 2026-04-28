@@ -32,7 +32,6 @@
       --white: #FFFFFF;
       --radius-sm: 8px;
       --radius-md: 12px;
-      --radius-lg: 16px;
       --font: 'Georgia', serif;
       --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --nav-h: 64px;
@@ -40,80 +39,100 @@
     }
 
     html, body { height: 100%; background: var(--gray-50); color: var(--gray-900); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
-
     #app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; background: var(--white); position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
 
-    /* ── HEADER ── */
+    /* HEADER */
     .app-header { padding: 52px 20px 16px; background: var(--sage); color: white; }
     .app-header h1 { font-family: var(--font); font-size: 28px; font-weight: normal; letter-spacing: -0.5px; }
-    .app-header p { font-size: 13px; opacity: 0.75; margin-top: 2px; }
-    .header-stats { display: flex; gap: 12px; margin-top: 16px; }
-    .hstat { background: rgba(255,255,255,0.15); border-radius: var(--radius-sm); padding: 8px 14px; text-align: center; flex: 1; }
-    .hstat-num { font-size: 22px; font-weight: 600; }
-    .hstat-label { font-size: 10px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
+    .budget-row { display: flex; gap: 10px; margin-top: 14px; }
+    .budget-block { flex: 1; background: rgba(255,255,255,0.15); border-radius: var(--radius-sm); padding: 10px 14px; }
+    .budget-label { font-size: 10px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+    .budget-amounts { display: flex; align-items: baseline; justify-content: space-between; }
+    .budget-spent { font-size: 20px; font-weight: 600; }
+    .budget-limit { font-size: 12px; opacity: 0.7; }
+    .budget-bar-bg { background: rgba(255,255,255,0.2); border-radius: 4px; height: 4px; margin-top: 8px; overflow: hidden; }
+    .budget-bar-fill { height: 100%; border-radius: 4px; background: white; transition: width 0.4s; }
+    .budget-bar-fill.over { background: #F09595; }
 
-    /* ── SCROLL AREA ── */
+    /* LAYOUT */
     .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px); }
+    .panel { display: none; padding: 20px; }
+    .panel.active { display: block; }
+    .section-label { font-size: 10px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    .card { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-md); margin-bottom: 12px; overflow: hidden; }
+    .card-body { padding: 16px; }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 14px; }
 
-    /* ── NAV ── */
+    /* NAV */
     .bottom-nav { position: sticky; bottom: 0; background: var(--white); border-top: 1px solid var(--gray-100); display: flex; padding-bottom: var(--safe-bottom); z-index: 10; }
     .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; border: none; background: none; cursor: pointer; color: var(--gray-400); font-size: 10px; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.15s; }
     .nav-btn svg { width: 22px; height: 22px; }
     .nav-btn.active { color: var(--sage); }
 
-    /* ── PANELS ── */
-    .panel { display: none; padding: 20px; }
-    .panel.active { display: block; }
+    /* PANTRY */
+    .pantry-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-sm); margin-bottom: 4px; border: 1px solid transparent; transition: all 0.15s; }
+    .pantry-item.status-ok { background: var(--sage-light); border-color: #C0DD97; }
+    .pantry-item.status-low { background: var(--amber-light); border-color: #FAC775; }
+    .pantry-item.status-out { background: var(--red-light); border-color: #F7C1C1; }
+    .item-name { font-size: 14px; color: var(--gray-900); font-weight: 500; }
+    .status-btns { display: flex; gap: 4px; }
+    .sbtn { height: 28px; border-radius: 6px; border: 1px solid transparent; background: rgba(255,255,255,0.6); font-size: 11px; font-weight: 500; cursor: pointer; padding: 0 10px; font-family: var(--font-sans); color: var(--gray-600); transition: all 0.15s; white-space: nowrap; }
+    .sbtn.active-ok { background: var(--sage); color: white; border-color: var(--sage-dark); }
+    .sbtn.active-low { background: var(--amber); color: white; border-color: #633806; }
+    .sbtn.active-out { background: var(--red); color: white; border-color: #791F1F; }
+    .cat-header { font-size: 10px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 0 6px; border-bottom: 1px solid var(--gray-100); }
 
-    /* ── SECTION LABEL ── */
-    .section-label { font-size: 10px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
-
-    /* ── CARDS ── */
-    .card { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-md); margin-bottom: 12px; overflow: hidden; }
-    .card-body { padding: 16px; }
-
-    /* ── PANTRY ITEMS ── */
-    .pantry-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
-    .pantry-item:last-child { border-bottom: none; }
-    .item-name { font-size: 14px; color: var(--gray-900); }
-    .item-cat { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
-    .status-btns { display: flex; gap: 6px; }
-    .sbtn { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--gray-200); background: var(--gray-50); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-    .sbtn.ok { border-color: var(--sage-mid); background: var(--sage-light); }
-    .sbtn.low { border-color: var(--amber); background: var(--amber-light); }
-    .sbtn.out { border-color: var(--red); background: var(--red-light); }
-
-    /* ── PROTEIN CARDS ── */
+    /* PROTEIN CARDS */
     .protein-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .pcard { border: 1.5px solid var(--gray-200); border-radius: var(--radius-md); padding: 14px; cursor: pointer; transition: all 0.15s; background: var(--white); }
     .pcard:active { transform: scale(0.97); }
     .pcard.selected { border-color: var(--sage); background: var(--sage-light); }
     .pcard-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
     .pcard-cost { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
-    .pcard-acid { font-size: 11px; color: var(--sage); margin-top: 6px; }
-    .pcard-fat  { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
-    .tip-box { background: var(--sage-light); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--sage-dark); line-height: 1.55; font-style: italic; }
+    .pcard-acid-label { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 8px; }
+    .pcard-acid { font-size: 11px; color: var(--gray-400); margin-top: 4px; font-style: italic; }
+    .change-btn { background: none; border: 1px solid var(--sage-mid); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; color: var(--sage-dark); cursor: pointer; font-family: var(--font-sans); white-space: nowrap; }
 
-    /* ── ROTATION LOG ── */
-    .rotation-row { display: grid; grid-template-columns: 48px 1fr 1fr; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); align-items: center; }
+    /* ROTATION LOG */
+    .rotation-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
     .rotation-row:last-child { border-bottom: none; }
-    .rotation-row.header { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
-    .rotation-row input { border: none; border-bottom: 1px solid var(--gray-200); padding: 4px 2px; font-size: 13px; font-family: var(--font-sans); color: var(--gray-900); background: transparent; width: 100%; }
-    .rotation-row input:focus { outline: none; border-bottom-color: var(--sage); }
-    .week-label { font-size: 12px; color: var(--gray-400); }
+    .rot-left { display: flex; align-items: center; gap: 12px; }
+    .week-label { font-size: 12px; color: var(--gray-400); min-width: 80px; }
+    .week-protein { font-size: 14px; color: var(--gray-900); font-weight: 500; }
+    .week-acid { font-size: 11px; color: var(--gray-400); font-style: italic; margin-top: 2px; }
+    .remove-btn { background: none; border: none; cursor: pointer; color: var(--gray-400); font-size: 18px; padding: 2px 6px; border-radius: var(--radius-sm); line-height: 1; }
+    .remove-btn:hover { color: var(--red); background: var(--red-light); }
+    .rot-empty { font-size: 13px; color: var(--gray-400); padding: 12px 0; font-style: italic; }
 
-    /* ── TRIP LOG ── */
-    .trip-form { display: flex; flex-direction: column; gap: 10px; }
-    .trip-form input, .trip-form textarea { width: 100%; border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: var(--font-sans); color: var(--gray-900); background: var(--white); }
-    .trip-form textarea { height: 80px; resize: none; }
-    .trip-form input:focus, .trip-form textarea:focus { outline: none; border-color: var(--sage); }
-    .trip-card { border: 1px solid var(--gray-100); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; }
-    .trip-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-    .trip-date { font-size: 13px; font-weight: 600; color: var(--gray-900); }
-    .trip-cost { font-size: 13px; color: var(--sage); font-weight: 600; }
-    .trip-items-text { font-size: 12px; color: var(--gray-600); line-height: 1.5; }
+    /* TRIP CHECKLIST */
+    .trip-prompt { text-align: center; padding: 32px 20px; }
+    .trip-prompt-text { font-size: 14px; color: var(--gray-600); line-height: 1.5; }
+    .checklist-section { margin-bottom: 20px; }
+    .checklist-section-label { font-size: 10px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+    .checklist-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 0.5px solid var(--gray-100); cursor: pointer; }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item.checked .check-label { color: var(--gray-400); text-decoration: line-through; }
+    .check-box { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--gray-200); background: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    .checklist-item.checked .check-box { background: var(--sage); border-color: var(--sage); }
+    .check-tick { display: none; color: white; font-size: 13px; font-weight: 600; }
+    .checklist-item.checked .check-tick { display: block; }
+    .check-label { font-size: 14px; color: var(--gray-900); }
+    .check-sub { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+    .trip-complete-bar { border-top: 1px solid var(--gray-100); padding-top: 16px; margin-top: 8px; }
+    .cost-input { width: 100%; border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 16px; font-family: var(--font-sans); color: var(--gray-900); background: var(--white); margin-bottom: 12px; }
+    .cost-input:focus { outline: none; border-color: var(--sage); }
+    .trip-history-card { border: 1px solid var(--gray-100); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; }
+    .trip-history-hdr { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .trip-history-date { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+    .trip-history-cost { font-size: 13px; color: var(--sage); font-weight: 600; }
+    .trip-history-items { font-size: 12px; color: var(--gray-600); line-height: 1.5; }
 
-    /* ── AI CHAT ── */
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: var(--font-sans); cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-sage { background: var(--sage); color: white; width: 100%; }
+    .btn-sage:active { opacity: 0.85; }
+
+    /* AI CHAT */
     .chat-area { display: flex; flex-direction: column; height: calc(100vh - 180px); }
     .chat-messages { flex: 1; overflow-y: auto; padding-bottom: 12px; }
     .chat-bubble { padding: 12px 14px; border-radius: var(--radius-md); margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
@@ -133,27 +152,6 @@
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
-
-    /* ── BUTTONS ── */
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: var(--font-sans); cursor: pointer; border: none; transition: all 0.15s; }
-    .btn-sage { background: var(--sage); color: white; width: 100%; }
-    .btn-sage:active { opacity: 0.85; }
-    .btn-outline { background: transparent; color: var(--sage); border: 1.5px solid var(--sage); width: 100%; margin-top: 8px; }
-
-    /* ── ALWAYS BUY ── */
-    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pill { background: var(--gray-100); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--gray-600); }
-
-    /* ── MEALS ── */
-    .meal-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gray-100); align-items: flex-start; }
-    .meal-row:last-child { border-bottom: none; }
-    .meal-time-badge { background: var(--sage-light); color: var(--sage-dark); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 11px; font-weight: 600; white-space: nowrap; min-width: 64px; text-align: center; }
-    .meal-name { font-size: 14px; color: var(--gray-900); font-weight: 500; }
-    .meal-technique { font-size: 12px; color: var(--gray-400); margin-top: 2px; font-style: italic; }
-
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 14px; }
-    .save-indicator { font-size: 11px; color: var(--sage); text-align: center; margin-top: 8px; opacity: 0; transition: opacity 0.3s; }
-    .save-indicator.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -161,11 +159,23 @@
 
   <div class="app-header">
     <h1>Pantry</h1>
-    <p>Salt Fat Acid Heat &nbsp;·&nbsp; 2 people &nbsp;·&nbsp; Cleveland, OH</p>
-    <div class="header-stats">
-      <div class="hstat"><div class="hstat-num" id="stat-ok">—</div><div class="hstat-label">Stocked</div></div>
-      <div class="hstat"><div class="hstat-num" id="stat-low">—</div><div class="hstat-label">Low</div></div>
-      <div class="hstat"><div class="hstat-num" id="stat-out">—</div><div class="hstat-label">Out</div></div>
+    <div class="budget-row">
+      <div class="budget-block">
+        <div class="budget-label">This week</div>
+        <div class="budget-amounts">
+          <span class="budget-spent" id="week-spent">$0</span>
+          <span class="budget-limit">of $200</span>
+        </div>
+        <div class="budget-bar-bg"><div class="budget-bar-fill" id="week-bar" style="width:0%"></div></div>
+      </div>
+      <div class="budget-block">
+        <div class="budget-label">This month</div>
+        <div class="budget-amounts">
+          <span class="budget-spent" id="month-spent">$0</span>
+          <span class="budget-limit">of $800</span>
+        </div>
+        <div class="budget-bar-bg"><div class="budget-bar-fill" id="month-bar" style="width:0%"></div></div>
+      </div>
     </div>
   </div>
 
@@ -173,60 +183,31 @@
 
     <!-- PANTRY -->
     <div id="panel-pantry" class="panel active">
-      <div class="section-label">Staples status</div>
       <div class="card"><div class="card-body" id="pantry-list"></div></div>
-
-      <div class="section-label" style="margin-top:20px">Always buy — every trip</div>
-      <div class="pill-row" id="always-buy-pills"></div>
-
-      <div class="section-label" style="margin-top:20px">Spring produce · Cleveland</div>
-      <div class="pill-row">
-        <span class="pill">Spinach</span><span class="pill">Arugula</span>
-        <span class="pill">Swiss chard</span><span class="pill">Kale</span>
-        <span class="pill">Pea shoots</span>
-      </div>
     </div>
 
-    <!-- ROTATION -->
+    <!-- PROTEIN LOG -->
     <div id="panel-rotation" class="panel">
-      <div class="section-label">This week's protein</div>
-      <div class="protein-grid" id="protein-grid"></div>
-      <div class="tip-box" id="protein-tip">Select a protein above to see Samin's tip.</div>
-
-      <div class="section-label" style="margin-top:24px">Rotation log</div>
+      <div class="section-label">Previous proteins</div>
       <div class="card">
-        <div class="card-body">
-          <div class="rotation-row header">
-            <div>Week</div><div>Protein</div><div>Acid / dairy</div>
-          </div>
-          <div id="rotation-log"></div>
-        </div>
+        <div class="card-body" id="rotation-log"></div>
       </div>
-      <button class="btn btn-sage" onclick="saveRotation()">Save rotation log</button>
-      <div class="save-indicator" id="save-indicator">Saved!</div>
     </div>
 
     <!-- TRIPS -->
     <div id="panel-trips" class="panel">
-      <div class="section-label">Log this trip</div>
-      <div class="card">
-        <div class="card-body trip-form">
-          <input type="date" id="trip-date" />
-          <textarea id="trip-items" placeholder="Items bought (garlic, salmon, lemons...)"></textarea>
-          <input type="text" id="trip-cost" placeholder="Approx. cost (e.g. $94)" />
-          <button class="btn btn-sage" onclick="addTrip()">Log trip</button>
-        </div>
-      </div>
-
-      <div class="section-label" style="margin-top:20px">History</div>
+      <div class="section-label">This week's protein</div>
+      <div class="protein-grid" id="protein-grid"></div>
+      <div id="trip-checklist-area"></div>
+      <div class="section-label" style="margin-top:24px">Trip history</div>
       <div id="trip-history"></div>
     </div>
 
-    <!-- AI -->
+    <!-- ASK CLAUDE -->
     <div id="panel-ai" class="panel">
       <div class="quick-btns">
         <button class="qbtn" onclick="quickPrompt('I am heading to the store — what do I need this week?')">Pre-shop brief</button>
-        <button class="qbtn" onclick="quickPrompt('What meals can I cook with what I have right now?')">What can I cook?</button>
+        <button class="qbtn" onclick="quickPrompt('What can I cook tonight? Give me 3 options.')">What can I cook tonight?</button>
         <button class="qbtn" onclick="quickPrompt('What protein should we rotate in this week and why?')">Protein pick</button>
         <button class="qbtn" onclick="quickPrompt('What pantry items are running low and need restocking?')">Restock check</button>
       </div>
@@ -243,12 +224,6 @@
       </div>
     </div>
 
-    <!-- MEALS -->
-    <div id="panel-meals" class="panel">
-      <div class="section-label">Weeknight reference</div>
-      <div class="card"><div class="card-body" id="meals-list"></div></div>
-    </div>
-
   </div>
 
   <nav class="bottom-nav">
@@ -258,7 +233,7 @@
     </button>
     <button class="nav-btn" onclick="switchPanel('rotation', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      Rotation
+      Protein log
     </button>
     <button class="nav-btn" onclick="switchPanel('trips', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -268,14 +243,11 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Ask Claude
     </button>
-    <button class="nav-btn" onclick="switchPanel('meals', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-      Meals
-    </button>
   </nav>
 </div>
 
 <script>
+// ── DATA ──
 const PANTRY_ITEMS = [
   {name:'Kosher salt',cat:'Dry goods'},{name:'Black pepper',cat:'Dry goods'},
   {name:'Olive oil',cat:'Dry goods'},{name:'Unsalted butter',cat:'Dry goods'},
@@ -284,154 +256,272 @@ const PANTRY_ITEMS = [
   {name:'Basmati or jasmine rice',cat:'Dry goods'},{name:'Canned chickpeas (2)',cat:'Dry goods'},
   {name:'Canned/dried lentils',cat:'Dry goods'},{name:'Chicken or veg stock',cat:'Dry goods'},
   {name:'Red wine vinegar',cat:'Dry goods'},{name:'Apple cider vinegar',cat:'Dry goods'},
-  {name:'Natural peanut butter',cat:'Lunch'},{name:'Jelly or jam',cat:'Lunch'},
-  {name:'Whole grain bread',cat:'Lunch'},{name:'Bananas or apples',cat:'Lunch'},
-  {name:'Trail mix or nuts',cat:'Lunch'},
+  {name:'Trail mix or nuts',cat:'Dry goods'},{name:'Whole grain bread',cat:'Dry goods'},
+  {name:'Natural peanut butter',cat:'Refrigerated goods'},{name:'Jelly or jam',cat:'Refrigerated goods'},
 ];
 
-const ALWAYS_BUY = ['Garlic (2 heads)','Yellow onions (3–4)','Lemons (6–8)','Carrots (1 bunch)','Celery (1 bunch)'];
+const ALWAYS_BUY = ['Garlic (2 heads)','Yellow onions (3–4)','Lemons (6–8)','Carrots (1 bunch)','Celery (1 bunch)','Bananas or apples'];
+
+const SPRING_PRODUCE = ['Spinach','Arugula','Swiss chard','Kale'];
 
 const PROTEINS = [
-  {name:'Chicken thighs',cost:'~$10 / week',acid:'Lemons + yogurt',tip:"Bone-in, skin-side up at 425°F for 35–40 min. Don't touch them — the fat in the skin self-bastes the whole time."},
-  {name:'Salmon',cost:'~$14 / week',acid:'Lemons + capers',tip:"Don't move it once it hits the pan. Let it release naturally (~4 min). Flip once, finish 2 min. That's it."},
-  {name:'Ground beef/turkey',cost:'~$9 / week',acid:'Canned tomatoes + red wine vinegar',tip:"Brown in batches, don't stir. You want a crust to form — crowding the pan steams instead of sears."},
-  {name:'Pantry week',cost:'~$8 / week',acid:'Lemons + yogurt',tip:"Eggs + chickpeas/lentils only. A pot of lentil soup costs under $4 and feeds you for days. The lemon at the end is non-negotiable."},
-  {name:'Shrimp',cost:'~$12 / week',acid:'Lemon + capers',fat:'Butter',tip:"Shrimp cooks in 2–3 minutes — the moment it curls and turns pink it's done. Pull it off the heat immediately, it keeps cooking."},
-];
-
-const MEALS = [
-  {time:'10–15 min',name:'Fried eggs over rice & greens',technique:'Butter, medium heat, baste with butter'},
-  {time:'20–25 min',name:'Pan-seared lemon butter salmon',technique:"Don't move it, flip once"},
-  {time:'25–30 min',name:'Shakshuka',technique:'Simmer tomatoes, poach eggs in sauce'},
-  {time:'30–35 min',name:'Meat sauce over pasta or rice',technique:"Brown hard, don't crowd, add vinegar at end"},
-  {time:'35–40 min',name:'Chickpea braise with tomatoes',technique:'Olive oil, garlic, tomatoes, lemon to finish'},
-  {time:'40–45 min',name:'Lentil soup',technique:'Slow simmer, lemon right before serving'},
-  {time:'45+ min',name:'Roast chicken thighs',technique:"425°F, skin-up, 35–40 min, don't touch"},
+  {name:'Chicken thighs',cost:'~$10 / week',acid:'Lemons + yogurt'},
+  {name:'Salmon',cost:'~$14 / week',acid:'Lemons + capers'},
+  {name:'Ground beef',cost:'~$9 / week',acid:'Canned tomatoes + red wine vinegar'},
+  {name:'Shrimp',cost:'~$12 / week',acid:'Lemon + capers'},
+  {name:'Pork chops',cost:'~$10 / week',acid:'Apple cider vinegar + Dijon'},
+  {name:'Lamb',cost:'~$14 / week',acid:'Lemon + red wine vinegar + yogurt'},
+  {name:'White fish',cost:'~$12 / week',acid:'Lemon + capers'},
+  {name:'Italian sausage',cost:'~$9 / week',acid:'Canned tomatoes + red wine vinegar'},
+  {name:'Tofu',cost:'~$6 / week',acid:'Soy sauce + rice vinegar'},
+  {name:'Chicken breasts',cost:'~$10 / week',acid:'Lemon + Dijon mustard'},
+  {name:'Skirt steak',cost:'~$13 / week',acid:'Red wine vinegar + lemon'},
+  {name:'Roast chicken',cost:'~$12 / week',acid:'Lemons + yogurt'},
 ];
 
 // ── STATE ──
-let pantryStatus = JSON.parse(localStorage.getItem('sfah_pantry') || '{}');
-let rotationState = JSON.parse(localStorage.getItem('sfah_rotation') || '[]');
-let tripsState = JSON.parse(localStorage.getItem('sfah_trips') || '[]');
+let pantryStatus    = JSON.parse(localStorage.getItem('sfah_pantry')     || '{}');
+let rotationState   = JSON.parse(localStorage.getItem('sfah_rotation')   || '[]');
+let tripsState      = JSON.parse(localStorage.getItem('sfah_trips')      || '[]');
+let checklistState  = JSON.parse(localStorage.getItem('sfah_checklist')  || '{}');
 let selectedProtein = null;
 
 // ── PERSIST ──
 function persist() {
-  localStorage.setItem('sfah_pantry', JSON.stringify(pantryStatus));
-  localStorage.setItem('sfah_rotation', JSON.stringify(rotationState));
-  localStorage.setItem('sfah_trips', JSON.stringify(tripsState));
+  localStorage.setItem('sfah_pantry',    JSON.stringify(pantryStatus));
+  localStorage.setItem('sfah_rotation',  JSON.stringify(rotationState));
+  localStorage.setItem('sfah_trips',     JSON.stringify(tripsState));
 }
 
-// ── STATS ──
-function renderStats() {
-  const ok = PANTRY_ITEMS.filter(i => (pantryStatus[i.name]||'ok')==='ok').length;
-  const low = PANTRY_ITEMS.filter(i => pantryStatus[i.name]==='low').length;
-  const out = PANTRY_ITEMS.filter(i => pantryStatus[i.name]==='out').length;
-  document.getElementById('stat-ok').textContent = ok;
-  document.getElementById('stat-low').textContent = low;
-  document.getElementById('stat-out').textContent = out;
+function persistChecklist() {
+  localStorage.setItem('sfah_checklist', JSON.stringify(checklistState));
+}
+
+// ── BUDGET ──
+function renderBudget() {
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  weekStart.setHours(0, 0, 0, 0);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  function parseCost(str) {
+    if (!str || str === '—') return 0;
+    const n = parseFloat(str.replace(/[^0-9.]/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  const weekSpent  = tripsState.filter(t => new Date(t.date) >= weekStart).reduce((s,t) => s + parseCost(t.cost), 0);
+  const monthSpent = tripsState.filter(t => new Date(t.date) >= monthStart).reduce((s,t) => s + parseCost(t.cost), 0);
+
+  document.getElementById('week-spent').textContent  = '$' + weekSpent.toFixed(0);
+  document.getElementById('month-spent').textContent = '$' + monthSpent.toFixed(0);
+
+  const wb = document.getElementById('week-bar');
+  wb.style.width = Math.min((weekSpent / 200) * 100, 100) + '%';
+  wb.classList.toggle('over', weekSpent > 200);
+
+  const mb = document.getElementById('month-bar');
+  mb.style.width = Math.min((monthSpent / 800) * 100, 100) + '%';
+  mb.classList.toggle('over', monthSpent > 800);
 }
 
 // ── PANTRY ──
 function renderPantry() {
-  document.getElementById('pantry-list').innerHTML = PANTRY_ITEMS.map(item => {
-    const s = pantryStatus[item.name] || 'ok';
-    return `<div class="pantry-item">
-      <div><div class="item-name">${item.name}</div><div class="item-cat">${item.cat}</div></div>
-      <div class="status-btns">
-        <button class="sbtn ${s==='ok'?'ok':''}" title="Stocked" onclick="setStatus('${item.name}','ok')">✅</button>
-        <button class="sbtn ${s==='low'?'low':''}" title="Low" onclick="setStatus('${item.name}','low')">⚠️</button>
-        <button class="sbtn ${s==='out'?'out':''}" title="Out" onclick="setStatus('${item.name}','out')">❌</button>
-      </div>
-    </div>`;
+  const categories = [...new Set(PANTRY_ITEMS.map(i => i.cat))];
+  document.getElementById('pantry-list').innerHTML = categories.map(cat => {
+    const items = PANTRY_ITEMS.filter(i => i.cat === cat);
+    return `<div class="cat-header">${cat}</div>
+      ${items.map(item => {
+        const s = pantryStatus[item.name] || 'ok';
+        return `<div class="pantry-item status-${s}">
+          <div class="item-name">${item.name}</div>
+          <div class="status-btns">
+            <button class="sbtn ${s==='ok'?'active-ok':''}" onclick="setStatus('${item.name}','ok')">Stocked</button>
+            <button class="sbtn ${s==='low'?'active-low':''}" onclick="setStatus('${item.name}','low')">Low</button>
+            <button class="sbtn ${s==='out'?'active-out':''}" onclick="setStatus('${item.name}','out')">Out</button>
+          </div>
+        </div>`;
+      }).join('')}`;
   }).join('');
-  document.getElementById('always-buy-pills').innerHTML = ALWAYS_BUY.map(i => `<span class="pill">${i}</span>`).join('');
 }
 
 function setStatus(name, status) {
   pantryStatus[name] = status;
   persist();
   renderPantry();
-  renderStats();
 }
 
-// ── ROTATION ──
+// ── PROTEIN CARDS ──
 function renderProteins() {
-  document.getElementById('protein-grid').innerHTML = PROTEINS.map((p,i) => `
-    <div class="pcard ${selectedProtein===i?'selected':''}" onclick="selectProtein(${i})">
-      <div class="pcard-name">${p.name}</div>
-      <div class="pcard-cost">${p.cost}</div>
-      <div class="pcard-acid">${p.acid}</div>
-      ${p.fat ? `<div class="pcard-fat">${p.fat}</div>` : ''}
-    </div>`).join('');
-  document.getElementById('protein-tip').textContent =
-    selectedProtein !== null ? PROTEINS[selectedProtein].tip : "Select a protein above to see Samin's tip.";
+  const grid = document.getElementById('protein-grid');
+  if (selectedProtein !== null) {
+    const p = PROTEINS[selectedProtein];
+    grid.innerHTML = `
+      <div class="pcard selected" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="pcard-name">${p.name}</div>
+          <div class="pcard-cost">${p.cost}</div>
+          <div class="pcard-acid-label">Pairs with</div>
+          <div class="pcard-acid">${p.acid}</div>
+        </div>
+        <button class="change-btn" onclick="cancelProtein()">Change</button>
+      </div>`;
+  } else {
+    grid.innerHTML = PROTEINS.map((p,i) => `
+      <div class="pcard" onclick="selectProtein(${i})">
+        <div class="pcard-name">${p.name}</div>
+        <div class="pcard-cost">${p.cost}</div>
+        <div class="pcard-acid-label">Pairs with</div>
+        <div class="pcard-acid">${p.acid}</div>
+      </div>`).join('');
+  }
 }
 
 function selectProtein(i) {
   selectedProtein = i;
+  checklistState = {};
+  persistChecklist();
   renderProteins();
+  renderChecklist();
 }
 
+function cancelProtein() {
+  selectedProtein = null;
+  checklistState = {};
+  persistChecklist();
+  renderProteins();
+  renderChecklist();
+}
+
+// ── PROTEIN LOG ──
 function renderRotationLog() {
-  document.getElementById('rotation-log').innerHTML = Array.from({length:8},(_,i) => {
-    const r = rotationState[i] || {protein:'',acid:''};
-    return `<div class="rotation-row">
-      <div class="week-label">Wk ${i+1}</div>
-      <input value="${r.protein}" placeholder="—" onchange="updateRotation(${i},'protein',this.value)" />
-      <input value="${r.acid}" placeholder="—" onchange="updateRotation(${i},'acid',this.value)" />
-    </div>`;
-  }).join('');
-}
-
-function updateRotation(i, field, val) {
-  if (!rotationState[i]) rotationState[i] = {protein:'',acid:''};
-  rotationState[i][field] = val;
-}
-
-function saveRotation() {
-  persist();
-  const ind = document.getElementById('save-indicator');
-  ind.classList.add('show');
-  setTimeout(() => ind.classList.remove('show'), 2000);
-}
-
-// ── TRIPS ──
-function renderTrips() {
-  const el = document.getElementById('trip-history');
-  if (!tripsState.length) {
-    el.innerHTML = '<div class="empty-state">No trips logged yet.<br>Log your first trip above.</div>';
+  const el = document.getElementById('rotation-log');
+  if (!rotationState.length) {
+    el.innerHTML = '<div class="rot-empty">No proteins logged yet — complete a trip to start tracking.</div>';
     return;
   }
-  el.innerHTML = tripsState.slice().reverse().map(t => `
-    <div class="trip-card">
-      <div class="trip-card-header">
-        <div class="trip-date">${t.date}</div>
-        <div class="trip-cost">${t.cost}</div>
+  const labels = ['This week','Last week','2 weeks ago','3 weeks ago'];
+  el.innerHTML = rotationState.map((r,i) => `
+    <div class="rotation-row">
+      <div class="rot-left">
+        <div class="week-label">${labels[i] || `Wk ${i+1}`}</div>
+        <div>
+          <div class="week-protein">${r.protein}</div>
+          <div class="week-acid">${r.acid}</div>
+        </div>
       </div>
-      <div class="trip-items-text">${t.items}</div>
+      <button class="remove-btn" onclick="removeRotationEntry(${i})">×</button>
     </div>`).join('');
 }
 
-function addTrip() {
-  const date = document.getElementById('trip-date').value;
-  const items = document.getElementById('trip-items').value.trim();
-  const cost = document.getElementById('trip-cost').value.trim() || '—';
-  if (!date || !items) return;
-  tripsState.push({date, items, cost});
+function removeRotationEntry(i) {
+  rotationState.splice(i, 1);
   persist();
-  document.getElementById('trip-date').value = '';
-  document.getElementById('trip-items').value = '';
-  document.getElementById('trip-cost').value = '';
+  renderRotationLog();
+}
+
+// ── TRIP CHECKLIST ──
+function buildChecklist() {
+  if (selectedProtein === null) return null;
+  const p = PROTEINS[selectedProtein];
+
+  const acidItems = p.acid.split('+').map(a => a.trim().replace(/\b\w/g, c => c.toUpperCase()));
+
+  return [
+    { label: 'Protein',       items: [{ id: 'protein', name: p.name, sub: p.cost }] },
+    { label: 'Acid & dairy',  items: acidItems.map((a,i) => ({ id: 'acid_'+i, name: a })) },
+    { label: 'Always buy',    items: ALWAYS_BUY.map((a,i) => ({ id: 'always_'+i, name: a })) },
+    { label: 'Spring produce',items: SPRING_PRODUCE.map((a,i) => ({ id: 'produce_'+i, name: a })) },
+    ...((() => {
+      const restock = PANTRY_ITEMS.filter(i => pantryStatus[i.name] === 'low' || pantryStatus[i.name] === 'out');
+      return restock.length ? [{ label: 'Restock', items: restock.map(i => ({ id:'restock_'+i.name, name:i.name, sub: pantryStatus[i.name]==='out'?'Out':'Running low' })) }] : [];
+    })())
+  ];
+}
+
+function renderChecklist() {
+  const el = document.getElementById('trip-checklist-area');
+  const sections = buildChecklist();
+
+  if (!sections) {
+    el.innerHTML = '<div class="trip-prompt"><div class="trip-prompt-text">Select a protein above to automatically generate your shopping list.</div></div>';
+    return;
+  }
+
+  const allItems = sections.flatMap(s => s.items);
+  const progress = Math.round((allItems.filter(i => checklistState[i.id]).length / allItems.length) * 100);
+
+  el.innerHTML = `
+    <div class="section-label">Shopping list</div>
+    <div style="background:var(--gray-100);border-radius:4px;height:4px;margin-bottom:16px;overflow:hidden;">
+      <div style="height:100%;width:${progress}%;background:var(--sage);border-radius:4px;transition:width 0.3s;"></div>
+    </div>
+    ${sections.map(s => `
+      <div class="checklist-section">
+        <div class="checklist-section-label">${s.label}</div>
+        <div class="card" style="padding:0 16px;">
+          ${s.items.map(item => `
+            <div class="checklist-item ${checklistState[item.id]?'checked':''}" onclick="toggleCheck('${item.id}')">
+              <div class="check-box"><span class="check-tick">✓</span></div>
+              <div>
+                <div class="check-label">${item.name}</div>
+                ${item.sub?`<div class="check-sub">${item.sub}</div>`:''}
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('')}
+    <div class="trip-complete-bar">
+      <input class="cost-input" type="text" id="trip-cost-input" placeholder="Total cost (e.g. $147)" />
+      <button class="btn btn-sage" onclick="completeTrip()">Complete trip</button>
+    </div>`;
+}
+
+function toggleCheck(id) {
+  checklistState[id] = !checklistState[id];
+  persistChecklist();
+  renderChecklist();
+}
+
+function completeTrip() {
+  const sections = buildChecklist();
+  if (!sections) return;
+
+  const cost  = document.getElementById('trip-cost-input')?.value.trim() || '—';
+  const date  = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  const items = sections.flatMap(s => s.items.map(i => i.name)).join(', ');
+
+  if (selectedProtein !== null) {
+    const p = PROTEINS[selectedProtein];
+    rotationState.unshift({protein: p.name, acid: p.acid});
+    if (rotationState.length > 4) rotationState = rotationState.slice(0, 4);
+  }
+
+  tripsState.push({date, items, cost});
+  checklistState  = {};
+  selectedProtein = null;
+  persistChecklist();
+  persist();
+  renderBudget();
+  renderProteins();
+  renderRotationLog();
+  renderChecklist();
   renderTrips();
 }
 
-// ── MEALS ──
-function renderMeals() {
-  document.getElementById('meals-list').innerHTML = MEALS.map(m => `
-    <div class="meal-row">
-      <div class="meal-time-badge">${m.time}</div>
-      <div><div class="meal-name">${m.name}</div><div class="meal-technique">${m.technique}</div></div>
+function renderTrips() {
+  const el = document.getElementById('trip-history');
+  if (!tripsState.length) {
+    el.innerHTML = '<div class="empty-state">No trips logged yet.</div>';
+    return;
+  }
+  el.innerHTML = tripsState.slice().reverse().map(t => `
+    <div class="trip-history-card">
+      <div class="trip-history-hdr">
+        <div class="trip-history-date">${t.date}</div>
+        <div class="trip-history-cost">${t.cost}</div>
+      </div>
+      <div class="trip-history-items">${t.items}</div>
     </div>`).join('');
 }
 
@@ -442,7 +532,6 @@ function addBubble(text, role) {
   el.innerHTML = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
   document.getElementById('chat-messages').appendChild(el);
   el.scrollIntoView({behavior:'smooth'});
-  return el;
 }
 
 function showTyping() {
@@ -455,8 +544,7 @@ function showTyping() {
 }
 
 function removeTyping() {
-  const el = document.getElementById('typing-indicator');
-  if (el) el.remove();
+  document.getElementById('typing-indicator')?.remove();
 }
 
 async function sendChat() {
@@ -466,17 +554,11 @@ async function sendChat() {
   input.value = '';
   addBubble(msg, 'user');
   showTyping();
-
   try {
-    const res = await fetch('/api/chat', {
+    const res  = await fetch('/api/chat', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        message: msg,
-        pantryStatus,
-        rotationHistory: rotationState,
-        tripHistory: tripsState,
-      })
+      body: JSON.stringify({message: msg, pantryStatus, rotationHistory: rotationState, tripHistory: tripsState})
     });
     const data = await res.json();
     removeTyping();
@@ -498,22 +580,21 @@ function switchPanel(name, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   btn.classList.add('active');
+  if (name === 'trips') { renderProteins(); renderChecklist(); }
 }
 
 // ── INIT ──
 function init() {
-  renderStats();
+  renderBudget();
   renderPantry();
-  renderProteins();
   renderRotationLog();
+  renderProteins();
+  renderChecklist();
   renderTrips();
-  renderMeals();
-  document.getElementById('trip-date').valueAsDate = new Date();
 }
 
 init();
 
-// ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
