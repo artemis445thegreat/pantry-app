@@ -91,6 +91,7 @@
     .pcard-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
     .pcard-cost { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
     .pcard-acid { font-size: 11px; color: var(--sage); margin-top: 6px; }
+    .pcard-fat  { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
     .tip-box { background: var(--sage-light); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--sage-dark); line-height: 1.55; font-style: italic; }
 
     /* ── ROTATION LOG ── */
@@ -295,6 +296,7 @@ const PROTEINS = [
   {name:'Salmon',cost:'~$14 / week',acid:'Lemons + capers',tip:"Don't move it once it hits the pan. Let it release naturally (~4 min). Flip once, finish 2 min. That's it."},
   {name:'Ground beef/turkey',cost:'~$9 / week',acid:'Canned tomatoes + red wine vinegar',tip:"Brown in batches, don't stir. You want a crust to form — crowding the pan steams instead of sears."},
   {name:'Pantry week',cost:'~$8 / week',acid:'Lemons + yogurt',tip:"Eggs + chickpeas/lentils only. A pot of lentil soup costs under $4 and feeds you for days. The lemon at the end is non-negotiable."},
+  {name:'Shrimp',cost:'~$12 / week',acid:'Lemon + capers',fat:'Butter',tip:"Shrimp cooks in 2–3 minutes — the moment it curls and turns pink it's done. Pull it off the heat immediately, it keeps cooking."},
 ];
 
 const MEALS = [
@@ -360,6 +362,7 @@ function renderProteins() {
       <div class="pcard-name">${p.name}</div>
       <div class="pcard-cost">${p.cost}</div>
       <div class="pcard-acid">${p.acid}</div>
+      ${p.fat ? `<div class="pcard-fat">${p.fat}</div>` : ''}
     </div>`).join('');
   document.getElementById('protein-tip').textContent =
     selectedProtein !== null ? PROTEINS[selectedProtein].tip : "Select a protein above to see Samin's tip.";
