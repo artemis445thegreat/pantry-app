@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pantry — Salt Fat Acid Heat</title>
+  <meta name="description" content="Pantry & shopping tracker for 2 people in Cleveland, OH" />
+  <meta name="theme-color" content="#3B6D11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pantry" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sage: #3B6D11;
+      --sage-light: #EAF3DE;
+      --sage-mid: #639922;
+      --sage-dark: #27500A;
+      --amber: #BA7517;
+      --amber-light: #FAEEDA;
+      --red: #E24B4A;
+      --red-light: #FCEBEB;
+      --gray-50: #F8F7F4;
+      --gray-100: #EFEFEB;
+      --gray-200: #D3D1C7;
+      --gray-400: #888780;
+      --gray-600: #5F5E5A;
+      --gray-900: #1C1C1A;
+      --white: #FFFFFF;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font: 'Georgia', serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --nav-h: 64px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body { height: 100%; background: var(--gray-50); color: var(--gray-900); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+
+    #app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; background: var(--white); position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+
+    /* ── HEADER ── */
+    .app-header { padding: 52px 20px 16px; background: var(--sage); color: white; }
+    .app-header h1 { font-family: var(--font); font-size: 28px; font-weight: normal; letter-spacing: -0.5px; }
+    .app-header p { font-size: 13px; opacity: 0.75; margin-top: 2px; }
+    .header-stats { display: flex; gap: 12px; margin-top: 16px; }
+    .hstat { background: rgba(255,255,255,0.15); border-radius: var(--radius-sm); padding: 8px 14px; text-align: center; flex: 1; }
+    .hstat-num { font-size: 22px; font-weight: 600; }
+    .hstat-label { font-size: 10px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
+
+    /* ── SCROLL AREA ── */
+    .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px); }
+
+    /* ── NAV ── */
+    .bottom-nav { position: sticky; bottom: 0; background: var(--white); border-top: 1px solid var(--gray-100); display: flex; padding-bottom: var(--safe-bottom); z-index: 10; }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; border: none; background: none; cursor: pointer; color: var(--gray-400); font-size: 10px; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.15s; }
+    .nav-btn svg { width: 22px; height: 22px; }
+    .nav-btn.active { color: var(--sage); }
+
+    /* ── PANELS ── */
+    .panel { display: none; padding: 20px; }
+    .panel.active { display: block; }
+
+    /* ── SECTION LABEL ── */
+    .section-label { font-size: 10px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+
+    /* ── CARDS ── */
+    .card { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-md); margin-bottom: 12px; overflow: hidden; }
+    .card-body { padding: 16px; }
+
+    /* ── PANTRY ITEMS ── */
+    .pantry-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
+    .pantry-item:last-child { border-bottom: none; }
+    .item-name { font-size: 14px; color: var(--gray-900); }
+    .item-cat { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+    .status-btns { display: flex; gap: 6px; }
+    .sbtn { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--gray-200); background: var(--gray-50); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .sbtn.ok { border-color: var(--sage-mid); background: var(--sage-light); }
+    .sbtn.low { border-color: var(--amber); background: var(--amber-light); }
+    .sbtn.out { border-color: var(--red); background: var(--red-light); }
+
+    /* ── PROTEIN CARDS ── */
+    .protein-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .pcard { border: 1.5px solid var(--gray-200); border-radius: var(--radius-md); padding: 14px; cursor: pointer; transition: all 0.15s; background: var(--white); }
+    .pcard:active { transform: scale(0.97); }
+    .pcard.selected { border-color: var(--sage); background: var(--sage-light); }
+    .pcard-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+    .pcard-cost { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+    .pcard-acid { font-size: 11px; color: var(--sage); margin-top: 6px; }
+    .tip-box { background: var(--sage-light); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--sage-dark); line-height: 1.55; font-style: italic; }
+
+    /* ── ROTATION LOG ── */
+    .rotation-row { display: grid; grid-template-columns: 48px 1fr 1fr; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); align-items: center; }
+    .rotation-row:last-child { border-bottom: none; }
+    .rotation-row.header { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
+    .rotation-row input { border: none; border-bottom: 1px solid var(--gray-200); padding: 4px 2px; font-size: 13px; font-family: var(--font-sans); color: var(--gray-900); background: transparent; width: 100%; }
+    .rotation-row input:focus { outline: none; border-bottom-color: var(--sage); }
+    .week-label { font-size: 12px; color: var(--gray-400); }
+
+    /* ── TRIP LOG ── */
+    .trip-form { display: flex; flex-direction: column; gap: 10px; }
+    .trip-form input, .trip-form textarea { width: 100%; border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: var(--font-sans); color: var(--gray-900); background: var(--white); }
+    .trip-form textarea { height: 80px; resize: none; }
+    .trip-form input:focus, .trip-form textarea:focus { outline: none; border-color: var(--sage); }
+    .trip-card { border: 1px solid var(--gray-100); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; }
+    .trip-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .trip-date { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+    .trip-cost { font-size: 13px; color: var(--sage); font-weight: 600; }
+    .trip-items-text { font-size: 12px; color: var(--gray-600); line-height: 1.5; }
+
+    /* ── AI CHAT ── */
+    .chat-area { display: flex; flex-direction: column; height: calc(100vh - 180px); }
+    .chat-messages { flex: 1; overflow-y: auto; padding-bottom: 12px; }
+    .chat-bubble { padding: 12px 14px; border-radius: var(--radius-md); margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
+    .bubble-ai { background: var(--gray-50); border: 1px solid var(--gray-100); color: var(--gray-900); }
+    .bubble-user { background: var(--sage); color: white; margin-left: 32px; }
+    .bubble-ai strong { color: var(--sage-dark); }
+    .chat-input-row { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--gray-100); }
+    .chat-input { flex: 1; border: 1px solid var(--gray-200); border-radius: 24px; padding: 10px 16px; font-size: 14px; font-family: var(--font-sans); }
+    .chat-input:focus { outline: none; border-color: var(--sage); }
+    .chat-send { width: 42px; height: 42px; border-radius: 50%; background: var(--sage); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .chat-send:active { opacity: 0.8; }
+    .quick-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .qbtn { border: 1px solid var(--sage-mid); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--sage); background: var(--sage-light); cursor: pointer; font-family: var(--font-sans); }
+    .qbtn:active { background: var(--sage-mid); color: white; }
+    .typing { display: flex; gap: 4px; align-items: center; padding: 12px 14px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gray-400); animation: bounce 1.2s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: var(--font-sans); cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-sage { background: var(--sage); color: white; width: 100%; }
+    .btn-sage:active { opacity: 0.85; }
+    .btn-outline { background: transparent; color: var(--sage); border: 1.5px solid var(--sage); width: 100%; margin-top: 8px; }
+
+    /* ── ALWAYS BUY ── */
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { background: var(--gray-100); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--gray-600); }
+
+    /* ── MEALS ── */
+    .meal-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gray-100); align-items: flex-start; }
+    .meal-row:last-child { border-bottom: none; }
+    .meal-time-badge { background: var(--sage-light); color: var(--sage-dark); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 11px; font-weight: 600; white-space: nowrap; min-width: 64px; text-align: center; }
+    .meal-name { font-size: 14px; color: var(--gray-900); font-weight: 500; }
+    .meal-technique { font-size: 12px; color: var(--gray-400); margin-top: 2px; font-style: italic; }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 14px; }
+    .save-indicator { font-size: 11px; color: var(--sage); text-align: center; margin-top: 8px; opacity: 0; transition: opacity 0.3s; }
+    .save-indicator.show { opacity: 1; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <div class="app-header">
+    <h1>Pantry</h1>
+    <p>Salt Fat Acid Heat &nbsp;·&nbsp; 2 people &nbsp;·&nbsp; Cleveland, OH</p>
+    <div class="header-stats">
+      <div class="hstat"><div class="hstat-num" id="stat-ok">—</div><div class="hstat-label">Stocked</div></div>
+      <div class="hstat"><div class="hstat-num" id="stat-low">—</div><div class="hstat-label">Low</div></div>
+      <div class="hstat"><div class="hstat-num" id="stat-out">—</div><div class="hstat-label">Out</div></div>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- PANTRY -->
+    <div id="panel-pantry" class="panel active">
+      <div class="section-label">Staples status</div>
+      <div class="card"><div class="card-body" id="pantry-list"></div></div>
+
+      <div class="section-label" style="margin-top:20px">Always buy — every trip</div>
+      <div class="pill-row" id="always-buy-pills"></div>
+
+      <div class="section-label" style="margin-top:20px">Spring produce · Cleveland</div>
+      <div class="pill-row">
+        <span class="pill">Spinach</span><span class="pill">Arugula</span>
+        <span class="pill">Swiss chard</span><span class="pill">Kale</span>
+        <span class="pill">Pea shoots</span>
+      </div>
+    </div>
+
+    <!-- ROTATION -->
+    <div id="panel-rotation" class="panel">
+      <div class="section-label">This week's protein</div>
+      <div class="protein-grid" id="protein-grid"></div>
+      <div class="tip-box" id="protein-tip">Select a protein above to see Samin's tip.</div>
+
+      <div class="section-label" style="margin-top:24px">Rotation log</div>
+      <div class="card">
+        <div class="card-body">
+          <div class="rotation-row header">
+            <div>Week</div><div>Protein</div><div>Acid / dairy</div>
+          </div>
+          <div id="rotation-log"></div>
+        </div>
+      </div>
+      <button class="btn btn-sage" onclick="saveRotation()">Save rotation log</button>
+      <div class="save-indicator" id="save-indicator">Saved!</div>
+    </div>
+
+    <!-- TRIPS -->
+    <div id="panel-trips" class="panel">
+      <div class="section-label">Log this trip</div>
+      <div class="card">
+        <div class="card-body trip-form">
+          <input type="date" id="trip-date" />
+          <textarea id="trip-items" placeholder="Items bought (garlic, salmon, lemons...)"></textarea>
+          <input type="text" id="trip-cost" placeholder="Approx. cost (e.g. $94)" />
+          <button class="btn btn-sage" onclick="addTrip()">Log trip</button>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:20px">History</div>
+      <div id="trip-history"></div>
+    </div>
+
+    <!-- AI -->
+    <div id="panel-ai" class="panel">
+      <div class="quick-btns">
+        <button class="qbtn" onclick="quickPrompt('I am heading to the store — what do I need this week?')">Pre-shop brief</button>
+        <button class="qbtn" onclick="quickPrompt('What meals can I cook with what I have right now?')">What can I cook?</button>
+        <button class="qbtn" onclick="quickPrompt('What protein should we rotate in this week and why?')">Protein pick</button>
+        <button class="qbtn" onclick="quickPrompt('What pantry items are running low and need restocking?')">Restock check</button>
+      </div>
+      <div class="chat-area">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-bubble bubble-ai">Hey! I know your pantry, your rotation history, and your meal plan. Tap a quick action above or ask me anything.</div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chat-input" type="text" placeholder="Ask about your pantry..." onkeydown="if(event.key==='Enter')sendChat()" />
+          <button class="chat-send" onclick="sendChat()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEALS -->
+    <div id="panel-meals" class="panel">
+      <div class="section-label">Weeknight reference</div>
+      <div class="card"><div class="card-body" id="meals-list"></div></div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchPanel('pantry', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Pantry
+    </button>
+    <button class="nav-btn" onclick="switchPanel('rotation', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      Rotation
+    </button>
+    <button class="nav-btn" onclick="switchPanel('trips', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Trips
+    </button>
+    <button class="nav-btn" onclick="switchPanel('ai', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Ask Claude
+    </button>
+    <button class="nav-btn" onclick="switchPanel('meals', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Meals
+    </button>
+  </nav>
+</div>
+
+<script>
+const PANTRY_ITEMS = [
+  {name:'Kosher salt',cat:'Dry goods'},{name:'Black pepper',cat:'Dry goods'},
+  {name:'Olive oil',cat:'Dry goods'},{name:'Unsalted butter',cat:'Dry goods'},
+  {name:'Soy sauce / tamari',cat:'Dry goods'},{name:'Dijon mustard',cat:'Dry goods'},
+  {name:'Canned whole tomatoes (2)',cat:'Dry goods'},{name:'Dried pasta',cat:'Dry goods'},
+  {name:'Basmati or jasmine rice',cat:'Dry goods'},{name:'Canned chickpeas (2)',cat:'Dry goods'},
+  {name:'Canned/dried lentils',cat:'Dry goods'},{name:'Chicken or veg stock',cat:'Dry goods'},
+  {name:'Red wine vinegar',cat:'Dry goods'},{name:'Apple cider vinegar',cat:'Dry goods'},
+  {name:'Natural peanut butter',cat:'Lunch'},{name:'Jelly or jam',cat:'Lunch'},
+  {name:'Whole grain bread',cat:'Lunch'},{name:'Bananas or apples',cat:'Lunch'},
+  {name:'Trail mix or nuts',cat:'Lunch'},
+];
+
+const ALWAYS_BUY = ['Garlic (2 heads)','Yellow onions (3–4)','Lemons (6–8)','Carrots (1 bunch)','Celery (1 bunch)'];
+
+const PROTEINS = [
+  {name:'Chicken thighs',cost:'~$10 / week',acid:'Lemons + yogurt',tip:"Bone-in, skin-side up at 425°F for 35–40 min. Don't touch them — the fat in the skin self-bastes the whole time."},
+  {name:'Salmon',cost:'~$14 / week',acid:'Lemons + capers',tip:"Don't move it once it hits the pan. Let it release naturally (~4 min). Flip once, finish 2 min. That's it."},
+  {name:'Ground beef/turkey',cost:'~$9 / week',acid:'Canned tomatoes + red wine vinegar',tip:"Brown in batches, don't stir. You want a crust to form — crowding the pan steams instead of sears."},
+  {name:'Pantry week',cost:'~$8 / week',acid:'Lemons + yogurt',tip:"Eggs + chickpeas/lentils only. A pot of lentil soup costs under $4 and feeds you for days. The lemon at the end is non-negotiable."},
+];
+
+const MEALS = [
+  {time:'10–15 min',name:'Fried eggs over rice & greens',technique:'Butter, medium heat, baste with butter'},
+  {time:'20–25 min',name:'Pan-seared lemon butter salmon',technique:"Don't move it, flip once"},
+  {time:'25–30 min',name:'Shakshuka',technique:'Simmer tomatoes, poach eggs in sauce'},
+  {time:'30–35 min',name:'Meat sauce over pasta or rice',technique:"Brown hard, don't crowd, add vinegar at end"},
+  {time:'35–40 min',name:'Chickpea braise with tomatoes',technique:'Olive oil, garlic, tomatoes, lemon to finish'},
+  {time:'40–45 min',name:'Lentil soup',technique:'Slow simmer, lemon right before serving'},
+  {time:'45+ min',name:'Roast chicken thighs',technique:"425°F, skin-up, 35–40 min, don't touch"},
+];
+
+// ── STATE ──
+let pantryStatus = JSON.parse(localStorage.getItem('sfah_pantry') || '{}');
+let rotationState = JSON.parse(localStorage.getItem('sfah_rotation') || '[]');
+let tripsState = JSON.parse(localStorage.getItem('sfah_trips') || '[]');
+let selectedProtein = null;
+
+// ── PERSIST ──
+function persist() {
+  localStorage.setItem('sfah_pantry', JSON.stringify(pantryStatus));
+  localStorage.setItem('sfah_rotation', JSON.stringify(rotationState));
+  localStorage.setItem('sfah_trips', JSON.stringify(tripsState));
+}
+
+// ── STATS ──
+function renderStats() {
+  const ok = PANTRY_ITEMS.filter(i => (pantryStatus[i.name]||'ok')==='ok').length;
+  const low = PANTRY_ITEMS.filter(i => pantryStatus[i.name]==='low').length;
+  const out = PANTRY_ITEMS.filter(i => pantryStatus[i.name]==='out').length;
+  document.getElementById('stat-ok').textContent = ok;
+  document.getElementById('stat-low').textContent = low;
+  document.getElementById('stat-out').textContent = out;
+}
+
+// ── PANTRY ──
+function renderPantry() {
+  document.getElementById('pantry-list').innerHTML = PANTRY_ITEMS.map(item => {
+    const s = pantryStatus[item.name] || 'ok';
+    return `<div class="pantry-item">
+      <div><div class="item-name">${item.name}</div><div class="item-cat">${item.cat}</div></div>
+      <div class="status-btns">
+        <button class="sbtn ${s==='ok'?'ok':''}" title="Stocked" onclick="setStatus('${item.name}','ok')">✅</button>
+        <button class="sbtn ${s==='low'?'low':''}" title="Low" onclick="setStatus('${item.name}','low')">⚠️</button>
+        <button class="sbtn ${s==='out'?'out':''}" title="Out" onclick="setStatus('${item.name}','out')">❌</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('always-buy-pills').innerHTML = ALWAYS_BUY.map(i => `<span class="pill">${i}</span>`).join('');
+}
+
+function setStatus(name, status) {
+  pantryStatus[name] = status;
+  persist();
+  renderPantry();
+  renderStats();
+}
+
+// ── ROTATION ──
+function renderProteins() {
+  document.getElementById('protein-grid').innerHTML = PROTEINS.map((p,i) => `
+    <div class="pcard ${selectedProtein===i?'selected':''}" onclick="selectProtein(${i})">
+      <div class="pcard-name">${p.name}</div>
+      <div class="pcard-cost">${p.cost}</div>
+      <div class="pcard-acid">${p.acid}</div>
+    </div>`).join('');
+  document.getElementById('protein-tip').textContent =
+    selectedProtein !== null ? PROTEINS[selectedProtein].tip : "Select a protein above to see Samin's tip.";
+}
+
+function selectProtein(i) {
+  selectedProtein = i;
+  renderProteins();
+}
+
+function renderRotationLog() {
+  document.getElementById('rotation-log').innerHTML = Array.from({length:8},(_,i) => {
+    const r = rotationState[i] || {protein:'',acid:''};
+    return `<div class="rotation-row">
+      <div class="week-label">Wk ${i+1}</div>
+      <input value="${r.protein}" placeholder="—" onchange="updateRotation(${i},'protein',this.value)" />
+      <input value="${r.acid}" placeholder="—" onchange="updateRotation(${i},'acid',this.value)" />
+    </div>`;
+  }).join('');
+}
+
+function updateRotation(i, field, val) {
+  if (!rotationState[i]) rotationState[i] = {protein:'',acid:''};
+  rotationState[i][field] = val;
+}
+
+function saveRotation() {
+  persist();
+  const ind = document.getElementById('save-indicator');
+  ind.classList.add('show');
+  setTimeout(() => ind.classList.remove('show'), 2000);
+}
+
+// ── TRIPS ──
+function renderTrips() {
+  const el = document.getElementById('trip-history');
+  if (!tripsState.length) {
+    el.innerHTML = '<div class="empty-state">No trips logged yet.<br>Log your first trip above.</div>';
+    return;
+  }
+  el.innerHTML = tripsState.slice().reverse().map(t => `
+    <div class="trip-card">
+      <div class="trip-card-header">
+        <div class="trip-date">${t.date}</div>
+        <div class="trip-cost">${t.cost}</div>
+      </div>
+      <div class="trip-items-text">${t.items}</div>
+    </div>`).join('');
+}
+
+function addTrip() {
+  const date = document.getElementById('trip-date').value;
+  const items = document.getElementById('trip-items').value.trim();
+  const cost = document.getElementById('trip-cost').value.trim() || '—';
+  if (!date || !items) return;
+  tripsState.push({date, items, cost});
+  persist();
+  document.getElementById('trip-date').value = '';
+  document.getElementById('trip-items').value = '';
+  document.getElementById('trip-cost').value = '';
+  renderTrips();
+}
+
+// ── MEALS ──
+function renderMeals() {
+  document.getElementById('meals-list').innerHTML = MEALS.map(m => `
+    <div class="meal-row">
+      <div class="meal-time-badge">${m.time}</div>
+      <div><div class="meal-name">${m.name}</div><div class="meal-technique">${m.technique}</div></div>
+    </div>`).join('');
+}
+
+// ── AI CHAT ──
+function addBubble(text, role) {
+  const el = document.createElement('div');
+  el.className = `chat-bubble bubble-${role}`;
+  el.innerHTML = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  document.getElementById('chat-messages').appendChild(el);
+  el.scrollIntoView({behavior:'smooth'});
+  return el;
+}
+
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'chat-bubble bubble-ai typing';
+  el.id = 'typing-indicator';
+  el.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  document.getElementById('chat-messages').appendChild(el);
+  el.scrollIntoView({behavior:'smooth'});
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addBubble(msg, 'user');
+  showTyping();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message: msg,
+        pantryStatus,
+        rotationHistory: rotationState,
+        tripHistory: tripsState,
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    addBubble(data.reply || 'Something went wrong — try again.', 'ai');
+  } catch {
+    removeTyping();
+    addBubble('Could not reach the server. Check your connection.', 'ai');
+  }
+}
+
+function quickPrompt(msg) {
+  document.getElementById('chat-input').value = msg;
+  sendChat();
+}
+
+// ── NAV ──
+function switchPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── INIT ──
+function init() {
+  renderStats();
+  renderPantry();
+  renderProteins();
+  renderRotationLog();
+  renderTrips();
+  renderMeals();
+  document.getElementById('trip-date').valueAsDate = new Date();
+}
+
+init();
+
+// ── SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
