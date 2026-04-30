@@ -123,7 +123,7 @@
     .bubble-ai { background: var(--gray-50); border: 1px solid var(--gray-100); color: var(--gray-900); }
     .bubble-user { background: var(--sage); color: white; margin-left: 32px; }
     .bubble-ai strong { color: var(--sage-dark); }
-    .chat-input-row { flex-shrink: 0; display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--gray-100); margin: 0 -20px -20px; background: var(--white); }
+    .chat-input-row { flex-shrink: 0; display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--gray-100); margin: 0 -20px; background: var(--white); }
     .chat-input { flex: 1; border: 1px solid var(--gray-200); border-radius: 24px; padding: 10px 16px; font-size: 14px; font-family: var(--font-sans); }
     .chat-input:focus { outline: none; border-color: var(--sage); }
     .chat-send { width: 42px; height: 42px; border-radius: 50%; background: var(--sage); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -174,23 +174,23 @@
       <div id="trip-history"></div>
     </div>
 
-    <!-- ASK CLAUDE -->
-    <div id="panel-ai" class="panel" style="display:none;flex-direction:column;padding:20px;padding-bottom:0;height:calc(100vh - var(--nav-h) - 160px);">
-      <div style="margin-bottom:16px;">
-        <div style="font-size:20px;font-weight:600;color:var(--gray-900);font-family:var(--font);">Ask Claude</div>
-        <div style="font-size:13px;color:var(--gray-400);margin-top:4px;">Recipes, meal ideas, and shopping help</div>
-      </div>
-      <div class="chat-area">
-        <div class="chat-messages" id="chat-messages"></div>
-        <div class="chat-input-row">
-          <input class="chat-input" id="chat-input" type="text" placeholder="Ask about your pantry..." onkeydown="if(event.key==='Enter')sendChat()" />
-          <button class="chat-send" onclick="sendChat()">
-            <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 4l8 8h-5v8H9v-8H4l8-8z"/></svg>
-          </button>
-        </div>
+  </div>
+
+  <!-- ASK CLAUDE — outside scroll area so input stays pinned -->
+  <div id="panel-ai" style="display:none;flex-direction:column;flex:1;padding:20px;padding-bottom:0;overflow:hidden;">
+    <div style="margin-bottom:16px;flex-shrink:0;">
+      <div style="font-size:20px;font-weight:600;color:var(--gray-900);font-family:var(--font);">Ask Claude</div>
+      <div style="font-size:13px;color:var(--gray-400);margin-top:4px;">Recipes, meal ideas, and shopping help</div>
+    </div>
+    <div class="chat-area">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" type="text" placeholder="Ask about your pantry..." onkeydown="if(event.key==='Enter')sendChat()" />
+        <button class="chat-send" onclick="sendChat()">
+          <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 4l8 8h-5v8H9v-8H4l8-8z"/></svg>
+        </button>
       </div>
     </div>
-
   </div>
 
   <nav class="bottom-nav">
@@ -517,11 +517,17 @@ async function sendChat() {
 // ── NAV ──
 function switchPanel(name, btn) {
   document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+  document.getElementById('panel-ai').style.display = 'none';
+  document.querySelector('.scroll-area').style.display = 'block';
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const panel = document.getElementById('panel-' + name);
-  panel.style.display = name === 'ai' ? 'flex' : 'block';
   btn.classList.add('active');
-  if (name === 'trips') { renderProteins(); renderChecklist(); }
+  if (name === 'ai') {
+    document.querySelector('.scroll-area').style.display = 'none';
+    document.getElementById('panel-ai').style.display = 'flex';
+  } else {
+    document.getElementById('panel-' + name).style.display = 'block';
+    if (name === 'trips') { renderProteins(); renderChecklist(); }
+  }
 }
 
 // ── INIT ──
