@@ -117,13 +117,13 @@
     .btn-sage:active { opacity: 0.85; }
 
     /* AI CHAT */
-    .chat-area { display: flex; flex-direction: column; height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 280px); }
+    .chat-area { display: flex; flex-direction: column; flex: 1; min-height: 0; }
     .chat-messages { flex: 1; overflow-y: auto; padding-bottom: 12px; }
     .chat-bubble { padding: 12px 14px; border-radius: var(--radius-md); margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
     .bubble-ai { background: var(--gray-50); border: 1px solid var(--gray-100); color: var(--gray-900); }
     .bubble-user { background: var(--sage); color: white; margin-left: 32px; }
     .bubble-ai strong { color: var(--sage-dark); }
-    .chat-input-row { flex-shrink: 0; display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--gray-100); }
+    .chat-input-row { flex-shrink: 0; display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--gray-100); margin: 0 -20px -20px; background: var(--white); }
     .chat-input { flex: 1; border: 1px solid var(--gray-200); border-radius: 24px; padding: 10px 16px; font-size: 14px; font-family: var(--font-sans); }
     .chat-input:focus { outline: none; border-color: var(--sage); }
     .chat-send { width: 42px; height: 42px; border-radius: 50%; background: var(--sage); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -175,14 +175,13 @@
     </div>
 
     <!-- ASK CLAUDE -->
-    <div id="panel-ai" class="panel" style="display:none;flex-direction:column;padding:20px;height:100%;">
+    <div id="panel-ai" class="panel" style="display:none;flex-direction:column;padding:20px;padding-bottom:0;height:calc(100vh - var(--nav-h) - 160px);">
       <div style="margin-bottom:16px;">
         <div style="font-size:20px;font-weight:600;color:var(--gray-900);font-family:var(--font);">Ask Claude</div>
         <div style="font-size:13px;color:var(--gray-400);margin-top:4px;">Recipes, meal ideas, and shopping help</div>
       </div>
       <div class="chat-area">
-        <div class="chat-messages" id="chat-messages">
-        </div>
+        <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-row">
           <input class="chat-input" id="chat-input" type="text" placeholder="Ask about your pantry..." onkeydown="if(event.key==='Enter')sendChat()" />
           <button class="chat-send" onclick="sendChat()">
