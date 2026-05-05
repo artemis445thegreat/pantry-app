@@ -76,9 +76,17 @@
     .pcard.selected { border-color: var(--sage); background: var(--sage-light); }
     .pcard-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
     .pcard-cost { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
-    .pcard-acid-label { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 8px; }
-    .pcard-acid { font-size: 11px; color: var(--gray-400); margin-top: 4px; font-style: italic; }
     .pcard-badge { margin-top: 8px; font-size: 11px; color: var(--sage); font-weight: 600; }
+
+    /* PAIRING CARDS */
+    .pairing-section { margin-bottom: 20px; }
+    .pairing-protein-label { font-size: 12px; font-weight: 600; color: var(--gray-900); margin-bottom: 8px; }
+    .pairing-option { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); margin-bottom: 6px; cursor: pointer; transition: all 0.15s; background: var(--white); }
+    .pairing-option:active { transform: scale(0.98); }
+    .pairing-option.selected { border-color: var(--sage); background: var(--sage-light); }
+    .pairing-option-dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--gray-200); flex-shrink: 0; transition: all 0.15s; }
+    .pairing-option.selected .pairing-option-dot { background: var(--sage); border-color: var(--sage); }
+    .pairing-option-text { font-size: 13px; color: var(--gray-900); }
 
     /* TRIP CHECKLIST */
     .trip-prompt { text-align: center; padding: 32px 20px; }
@@ -144,8 +152,9 @@
 
     <!-- TRIPS -->
     <div id="panel-trips" class="panel">
-      <div class="section-label">Select proteins this week</div>
+      <div class="section-label">Step 1 — Select proteins</div>
       <div class="protein-grid" id="protein-grid"></div>
+      <div id="pairing-section"></div>
       <div id="trip-checklist-area"></div>
       <div class="section-label" style="margin-top:24px">Trip history</div>
       <div id="trip-history"></div>
@@ -165,25 +174,39 @@
   </nav>
 </div>
 
-<script>
+<script type="module">
 // ── DATA ──
 const PANTRY_ITEMS = [
-  {name:'Kosher salt',           cat:'Dry goods'},
-  {name:'Black pepper',          cat:'Dry goods'},
-  {name:'Olive oil',             cat:'Dry goods'},
-  {name:'Unsalted butter',       cat:'Dry goods'},
-  {name:'Soy sauce',             cat:'Dry goods'},
-  {name:'Dijon mustard',         cat:'Dry goods'},
-  {name:'Canned whole tomatoes', cat:'Dry goods'},
-  {name:'Pasta',                 cat:'Dry goods'},
-  {name:'Basmati or jasmine rice', cat:'Dry goods'},
-  {name:'Chicken stock',         cat:'Dry goods'},
-  {name:'Red wine vinegar',      cat:'Dry goods'},
-  {name:'Apple cider vinegar',   cat:'Dry goods'},
-  {name:'White vinegar',         cat:'Dry goods'},
-  {name:'Cooking spray',         cat:'Dry goods'},
-  {name:'Natural peanut butter', cat:'Refrigerated goods'},
-  {name:'Jelly or jam',          cat:'Refrigerated goods'},
+  // Oils & fats
+  {name:'Olive oil',             cat:'Oils & fats'},
+  {name:'Unsalted butter',       cat:'Oils & fats'},
+  {name:'Cooking spray',         cat:'Oils & fats'},
+
+  // Spices & seasonings
+  {name:'Kosher salt',           cat:'Spices & seasonings'},
+  {name:'Black pepper',          cat:'Spices & seasonings'},
+  {name:'Red pepper flakes',     cat:'Spices & seasonings'},
+  {name:'Cumin',                 cat:'Spices & seasonings'},
+  {name:'Smoked paprika',        cat:'Spices & seasonings'},
+  {name:'Dried oregano',         cat:'Spices & seasonings'},
+  {name:'Garlic powder',         cat:'Spices & seasonings'},
+  {name:'Onion powder',          cat:'Spices & seasonings'},
+  {name:'Cinnamon',              cat:'Spices & seasonings'},
+
+  // Sauces & condiments
+  {name:'Soy sauce',             cat:'Sauces & condiments'},
+  {name:'Dijon mustard',         cat:'Sauces & condiments'},
+
+  // Canned & dry goods
+  {name:'Canned whole tomatoes', cat:'Canned & dry goods'},
+  {name:'Pasta',                 cat:'Canned & dry goods'},
+  {name:'Basmati or jasmine rice', cat:'Canned & dry goods'},
+  {name:'Chicken stock',         cat:'Canned & dry goods'},
+
+  // Vinegars
+  {name:'Red wine vinegar',      cat:'Vinegars'},
+  {name:'Apple cider vinegar',   cat:'Vinegars'},
+  {name:'White vinegar',         cat:'Vinegars'},
 ];
 
 const ALWAYS_BUY = [
@@ -196,35 +219,113 @@ const ALWAYS_BUY = [
 const SPRING_PRODUCE = ['Spinach', 'Arugula', 'Swiss chard', 'Kale'];
 
 const PROTEINS = [
-  {name:'Chicken thighs',  cost:'~$10 / week', acid:'Lemons + yogurt'},
-  {name:'Salmon',          cost:'~$14 / week', acid:'Lemons + capers'},
-  {name:'Ground beef',     cost:'~$9 / week',  acid:'Canned whole tomatoes + red wine vinegar'},
-  {name:'Shrimp',          cost:'~$12 / week', acid:'Lemon + capers'},
-  {name:'Pork chops',      cost:'~$10 / week', acid:'Apple cider vinegar + Dijon'},
-  {name:'Lamb',            cost:'~$14 / week', acid:'Lemon + red wine vinegar + yogurt'},
-  {name:'White fish',      cost:'~$12 / week', acid:'Lemon + capers'},
-  {name:'Italian sausage', cost:'~$9 / week',  acid:'Canned whole tomatoes + red wine vinegar'},
-  {name:'Tofu',            cost:'~$6 / week',  acid:'Soy sauce + rice vinegar'},
-  {name:'Chicken breasts', cost:'~$10 / week', acid:'Lemon + Dijon mustard'},
-  {name:'Skirt steak',     cost:'~$13 / week', acid:'Red wine vinegar + lemon'},
-  {name:'Roast chicken',   cost:'~$12 / week', acid:'Lemons + yogurt'},
+  {name:'Chicken thighs',  cost:'~$10 / week', pairings:[
+    'Lemons + yogurt',
+    'White wine + capers',
+    'Dijon mustard + white wine vinegar',
+    'Buttermilk',
+  ]},
+  {name:'Salmon',          cost:'~$14 / week', pairings:[
+    'Lemons + capers',
+    'Miso + rice vinegar',
+    'Dijon + white wine',
+    'Soy sauce + rice vinegar',
+  ]},
+  {name:'Ground beef',     cost:'~$9 / week',  pairings:[
+    'Canned whole tomatoes + red wine vinegar',
+    'Worcestershire + Dijon',
+    'Soy sauce + rice vinegar',
+  ]},
+  {name:'Shrimp',          cost:'~$12 / week', pairings:[
+    'Lemon + capers',
+    'Garlic butter + white wine',
+    'Lime + apple cider vinegar',
+    'Miso + rice vinegar',
+  ]},
+  {name:'Pork chops',      cost:'~$10 / week', pairings:[
+    'Apple cider vinegar + Dijon',
+    'Balsamic + rosemary',
+    'Orange juice + red wine vinegar',
+    'Soy sauce + ginger',
+  ]},
+  {name:'Lamb',            cost:'~$14 / week', pairings:[
+    'Lemon + red wine vinegar + yogurt',
+    'Pomegranate + balsamic',
+    'Harissa + yogurt',
+    'Mint + white wine vinegar',
+  ]},
+  {name:'White fish',      cost:'~$12 / week', pairings:[
+    'Lemon + capers',
+    'Brown butter + white wine',
+    'Miso + rice vinegar',
+    'Canned whole tomatoes + white wine',
+  ]},
+  {name:'Italian sausage', cost:'~$9 / week',  pairings:[
+    'Canned whole tomatoes + red wine vinegar',
+    'White wine + fennel',
+    'Balsamic + onions',
+  ]},
+  {name:'Tofu',            cost:'~$6 / week',  pairings:[
+    'Soy sauce + rice vinegar',
+    'Miso + sesame + rice vinegar',
+    'Lime + apple cider vinegar',
+  ]},
+  {name:'Chicken breasts', cost:'~$10 / week', pairings:[
+    'Lemon + Dijon mustard',
+    'White wine + capers',
+    'Buttermilk',
+    'Pomegranate molasses + red wine vinegar',
+  ]},
+  {name:'Skirt steak',     cost:'~$13 / week', pairings:[
+    'Red wine vinegar + lemon',
+    'Soy sauce + lime',
+    'Worcestershire + Dijon',
+  ]},
+  {name:'Roast chicken',   cost:'~$12 / week', pairings:[
+    'Lemons + yogurt',
+    'White wine + capers',
+    'Dijon mustard + white wine vinegar',
+    'Preserved lemon + olive oil',
+  ]},
 ];
 
 // ── STATE ──
-let pantryStatus     = JSON.parse(localStorage.getItem('sfah_pantry')    || '{}');
-let tripsState       = JSON.parse(localStorage.getItem('sfah_trips')     || '[]');
-let checklistState   = JSON.parse(localStorage.getItem('sfah_checklist') || '{}');
-let selectedProteins = JSON.parse(localStorage.getItem('sfah_selected')  || '[]');
+let pantryStatus     = {};
+let tripsState       = [];
+let checklistState   = {};
+let selectedProteins = [];
+let selectedPairings = {};
+let dbReady          = false;
+
+// ── FIREBASE ──
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB-uWbHcpSmFT9eym5cJy0sduYajmUMusg",
+  authDomain: "pantry-app-55c64.firebaseapp.com",
+  databaseURL: "https://pantry-app-55c64-default-rtdb.firebaseio.com",
+  projectId: "pantry-app-55c64",
+  storageBucket: "pantry-app-55c64.firebasestorage.app",
+  messagingSenderId: "835490256666",
+  appId: "1:835490256666:web:97e12c1d24cffcee403ea3"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
 
 // ── PERSIST ──
 function persist() {
-  localStorage.setItem('sfah_pantry',   JSON.stringify(pantryStatus));
-  localStorage.setItem('sfah_trips',    JSON.stringify(tripsState));
-  localStorage.setItem('sfah_selected', JSON.stringify(selectedProteins));
+  update(ref(db, 'pantry'), {
+    pantryStatus,
+    tripsState,
+    selectedProteins,
+    selectedPairings,
+  });
 }
 
 function persistChecklist() {
-  localStorage.setItem('sfah_checklist', JSON.stringify(checklistState));
+  set(ref(db, 'pantry/checklistState'), checklistState);
 }
 
 // ── UTILITIES ──
@@ -302,27 +403,65 @@ function renderProteins() {
     return `<div class="pcard ${sel?'selected':''}" onclick="toggleProtein(${i})">
       <div class="pcard-name">${p.name}</div>
       <div class="pcard-cost">${p.cost}</div>
-      <div class="pcard-acid-label">Pairs with</div>
-      <div class="pcard-acid">${p.acid.split('+').map(a => capitalize(a.trim())).join(' + ')}</div>
       ${sel ? '<div class="pcard-badge">✓ Selected</div>' : ''}
     </div>`;
   }).join('');
+  renderPairings();
 }
 
 function toggleProtein(i) {
   const idx = selectedProteins.indexOf(i);
-  if (idx === -1) selectedProteins.push(i);
-  else selectedProteins.splice(idx, 1);
+  if (idx === -1) {
+    selectedProteins.push(i);
+  } else {
+    selectedProteins.splice(idx, 1);
+    delete selectedPairings[i];
+  }
   checklistState = {};
   persistChecklist();
   persist();
   renderProteins();
+}
+
+// ── PAIRING SELECTION ──
+function renderPairings() {
+  const el = document.getElementById('pairing-section');
+  if (!selectedProteins.length) { el.innerHTML = ''; renderChecklist(); return; }
+
+  el.innerHTML = `
+    <div class="section-label" style="margin-top:20px">Step 2 — Select pairings</div>
+    ${selectedProteins.map(i => {
+      const p = PROTEINS[i];
+      return `<div class="pairing-section">
+        <div class="pairing-protein-label">${p.name}</div>
+        ${p.pairings.map((pairing, pi) => {
+          const sel = selectedPairings[i] === pi;
+          return `<div class="pairing-option ${sel?'selected':''}" onclick="selectPairing(${i},${pi})">
+            <div class="pairing-option-dot"></div>
+            <div class="pairing-option-text">${pairing.split('+').map(a => capitalize(a.trim())).join(' + ')}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('')}`;
+
   renderChecklist();
+}
+
+function selectPairing(proteinIdx, pairingIdx) {
+  selectedPairings[proteinIdx] = pairingIdx;
+  checklistState = {};
+  persistChecklist();
+  persist();
+  renderPairings();
 }
 
 // ── TRIP CHECKLIST ──
 function buildChecklist() {
   if (!selectedProteins.length) return null;
+
+  // Only build list if all selected proteins have a pairing chosen
+  const allPaired = selectedProteins.every(i => selectedPairings[i] !== undefined);
+  if (!allPaired) return null;
 
   const sections = [];
 
@@ -334,7 +473,8 @@ function buildChecklist() {
   const allAcids = [];
   const seen = new Set();
   selectedProteins.forEach(i => {
-    PROTEINS[i].acid.split('+').map(a => capitalize(a.trim())).forEach(a => {
+    const pairing = PROTEINS[i].pairings[selectedPairings[i]];
+    pairing.split('+').map(a => capitalize(a.trim())).forEach(a => {
       if (!seen.has(a) && !isAlreadyCovered(a)) { seen.add(a); allAcids.push(a); }
     });
   });
@@ -360,8 +500,13 @@ function renderChecklist() {
   const el = document.getElementById('trip-checklist-area');
   const sections = buildChecklist();
 
+  if (!selectedProteins.length) {
+    el.innerHTML = '';
+    return;
+  }
+
   if (!sections) {
-    el.innerHTML = '<div class="trip-prompt"><div class="trip-prompt-text">Select one or more proteins above to generate your shopping list.</div></div>';
+    el.innerHTML = '<div class="trip-prompt"><div class="trip-prompt-text">Select a pairing for each protein above to generate your shopping list.</div></div>';
     return;
   }
 
@@ -406,6 +551,7 @@ function completeTrip() {
   tripsState.push({date, items, cost});
   checklistState   = {};
   selectedProteins = [];
+  selectedPairings = {};
   persistChecklist();
   persist();
   renderBudget();
@@ -436,18 +582,30 @@ function switchPanel(name, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + name).style.display = 'block';
   btn.classList.add('active');
-  if (name === 'trips') { renderProteins(); renderChecklist(); }
+  if (name === 'trips') { renderProteins(); renderPairings(); renderChecklist(); }
 }
 
 // ── INIT ──
 function init() {
   document.getElementById('panel-pantry').style.display = 'block';
   document.getElementById('nav-pantry').classList.add('active');
-  renderBudget();
-  renderPantry();
-  renderProteins();
-  renderChecklist();
-  renderTrips();
+
+  // Listen for real-time updates from Firebase
+  onValue(ref(db, 'pantry'), (snapshot) => {
+    const data = snapshot.val() || {};
+    pantryStatus     = data.pantryStatus     || {};
+    tripsState       = data.tripsState       || [];
+    checklistState   = data.checklistState   || {};
+    selectedProteins = data.selectedProteins || [];
+    selectedPairings = data.selectedPairings || {};
+    dbReady = true;
+    renderBudget();
+    renderPantry();
+    renderProteins();
+    renderPairings();
+    renderChecklist();
+    renderTrips();
+  });
 }
 
 init();
