@@ -174,7 +174,25 @@
   </nav>
 </div>
 
-<script type="module">
+<!-- Firebase compat SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+// ── FIREBASE INIT ──
+const firebaseConfig = {
+  apiKey: "AIzaSyB-uWbHcpSmFT9eym5cJy0sduYajmUMusg",
+  authDomain: "pantry-app-55c64.firebaseapp.com",
+  databaseURL: "https://pantry-app-55c64-default-rtdb.firebaseio.com",
+  projectId: "pantry-app-55c64",
+  storageBucket: "pantry-app-55c64.firebasestorage.app",
+  messagingSenderId: "835490256666",
+  appId: "1:835490256666:web:97e12c1d24cffcee403ea3"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 // ── DATA ──
 const PANTRY_ITEMS = [
   // Oils & fats
@@ -316,7 +334,7 @@ const db = getDatabase(firebaseApp);
 
 // ── PERSIST ──
 function persist() {
-  update(ref(db, 'pantry'), {
+  db.ref('pantry').update({
     pantryStatus,
     tripsState,
     selectedProteins,
@@ -325,7 +343,7 @@ function persist() {
 }
 
 function persistChecklist() {
-  set(ref(db, 'pantry/checklistState'), checklistState);
+  db.ref('pantry/checklistState').set(checklistState);
 }
 
 // ── UTILITIES ──
@@ -590,8 +608,7 @@ function init() {
   document.getElementById('panel-pantry').style.display = 'block';
   document.getElementById('nav-pantry').classList.add('active');
 
-  // Listen for real-time updates from Firebase
-  onValue(ref(db, 'pantry'), (snapshot) => {
+  db.ref('pantry').on('value', (snapshot) => {
     const data = snapshot.val() || {};
     pantryStatus     = data.pantryStatus     || {};
     tripsState       = data.tripsState       || [];
