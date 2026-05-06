@@ -608,6 +608,15 @@ function init() {
   document.getElementById('panel-pantry').style.display = 'block';
   document.getElementById('nav-pantry').classList.add('active');
 
+  // Render immediately with empty state so app is usable
+  renderBudget();
+  renderPantry();
+  renderProteins();
+  renderPairings();
+  renderChecklist();
+  renderTrips();
+
+  // Then sync with Firebase and re-render when data arrives
   db.ref('pantry').on('value', (snapshot) => {
     const data = snapshot.val() || {};
     pantryStatus     = data.pantryStatus     || {};
@@ -622,6 +631,8 @@ function init() {
     renderPairings();
     renderChecklist();
     renderTrips();
+  }, (error) => {
+    console.error('Firebase error:', error);
   });
 }
 
